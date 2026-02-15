@@ -1,10 +1,11 @@
 import logging
 
 from django.core.management import BaseCommand
-from scraper.models import Column
+from scraper.models import Article
 from scraper.service.prap_scraper import get_prap_data
 
 logger = logging.getLogger(__name__)
+
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
@@ -13,14 +14,16 @@ class Command(BaseCommand):
 
         for item in data_list:
             try:
-                Column.objects.update_or_create(
+                Article.objects.update_or_create(
                     identifier=item.identifier,
                     defaults={
                         'identifier': item.identifier,
+                        'author': item.author,
                         'title': item.title,
                         'summary': item.summary,
                         'image': item.image,
-                        'date': item.date,
+                        'posted_at': item.posted_at,
+                        'url': item.url,
                     }
                 )
             except Exception as e:

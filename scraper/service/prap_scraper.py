@@ -2,15 +2,15 @@ import httpx
 import logging
 
 from bs4 import BeautifulSoup
-from scraper.models import Column
+from scraper.models import Article
 
 DEFAULT_TIMEOUT = 30.0
 
 logger = logging.getLogger(__name__)
 
-def get_prap_data(start_url: str) -> list[Column] :
-    results: list[Column] = []
-    failed_columns = []
+def get_prap_data(start_url: str) -> list[Article] :
+    results: list[Article] = []
+    failed_articles = []
     current_url = start_url
     client = httpx.Client(timeout=DEFAULT_TIMEOUT)
 
@@ -34,17 +34,21 @@ def get_prap_data(start_url: str) -> list[Column] :
                         link = title_tag.find_parent('a').attrs.get('href')
                         identifier = link.split('?p=')[1]
 
-                        item = Column(
+                        author_tag = data.select_one('.uicore-post-footer a[rel="author"]')
+
+                        item = Article(
                             identifier =  identifier,
+                            author = author_tag.text.strip() if author_tag else "알 수 없음",
                             title =  title_tag.text.strip(),
                             summary = data.find('p').text.strip(),
                             image =  data.find(class_='uicore-cover-img')['style'].split('(')[1].split(')')[0],
-                            date =  data.select_one('.uicore-post-footer.uicore-body span:nth-of-type(3)').text.strip()
+                            posted_at =  data.select_one('.uicore-post-footer.uicore-body span:nth-of-type(3)').text.strip(),
+                            url = link
                         )
                         results.append(item)
                     except Exception as e:
                         logger.error(f"데이터 파싱 에러: {e}")
-                        failed_columns.append(identifier)
+                        failed_articles.append(identifier)
                         continue
 
                 has_next = soup.select_one('a.next.uicore-page-link')
@@ -58,7 +62,7 @@ def get_prap_data(start_url: str) -> list[Column] :
                 logger.error(f"요청 중 예외 발생: {e}")
                 break
 
-        if failed_columns:
-            logger.warning(f"실패한 ID 목록: {', '.join(failed_columns)}")
+        if failed_articles:
+            logger.warning(f"실패한 ID 목록: {', '.join(failed_articles)}")
 
         return results
