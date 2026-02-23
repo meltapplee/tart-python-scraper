@@ -48,3 +48,6 @@ python manage.py migrate
 # 크롤러 실행 
 python manage.py prap
 ```
+
+### 관련 프로젝트
+[tart-backend-api](https://github.com/meltapplee/tart-backend-api): 본 스크래퍼가 수집한 데이터를 DB에서 읽어와 페이징 및 정렬된 형태로 제공하는 Kotlin/Spring 기반 API 서버입니다.
