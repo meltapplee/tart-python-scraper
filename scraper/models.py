@@ -10,6 +10,7 @@ class Article(models.Model):
     posted_at = models.DateField("발행 날짜")
     url = models.URLField("원문 링크")
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "article"
